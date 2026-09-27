@@ -3,15 +3,8 @@ name: LLM Multiroute CI
 on:
   push:
     branches: [main, master]
-    paths:
-      - 'llm-multiroute/**'
-      - '.github/workflows/llm-multiroute-ci.yml'
-      - '.trivyignore'
   pull_request:
     branches: [main, master]
-    paths:
-      - 'llm-multiroute/**'
-      - '.github/workflows/llm-multiroute-ci.yml'
   workflow_dispatch:
 
 defaults:
