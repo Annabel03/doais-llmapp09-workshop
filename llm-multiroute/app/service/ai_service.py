@@ -97,6 +97,9 @@ class AIService:
             "rather than only the negative ones. Do not default to positive scores "
             "for negative or neutral text, and do not default to negative scores "
             "for mixed text.\n\n"
+            "If the text is informational, neutral, or non-emotional, return an "
+            "empty emotions list. Do not invent emotions such as 'neutral' or "
+            "'indifference' for neutral text.\n\n"
             "emotions must include at least one emotion representing each distinct "
             "sentiment present in the text — for mixed text, include emotions for "
             "both the positive elements (e.g. admiration, satisfaction) and the "
@@ -106,6 +109,8 @@ class AIService:
             '"emotions": ["anger", "disappointment"], "confidence": 0.9}\n'
             'Positive text -> {"overallSentiment": "positive", "sentimentScore": 0.8, '
             '"emotions": ["joy", "excitement"], "confidence": 0.9}\n'
+            'Neutral text -> {"overallSentiment": "neutral", "sentimentScore": 0.0, '
+            '"emotions": [], "confidence": 0.9}\n'
             'Mixed text -> {"overallSentiment": "mixed", "sentimentScore": 0.1, '
             '"emotions": ["admiration", "disappointment"], "confidence": 0.9}\n\n'
             "Return JSON in this exact format:\n"
@@ -113,7 +118,12 @@ class AIService:
             '"emotions": ["emotion1", "emotion2"], "confidence": 0.9}'
         )
         response = self._chat(prompt, model, task_type="sentiment")
-        return guardrails_engine.validate_output(response, SentimentResponse, task_type="sentiment")
+        validated = guardrails_engine.validate_output(response, SentimentResponse, task_type="sentiment")
+
+        if validated.overallSentiment == "neutral":
+            validated.emotions = []
+
+        return validated
 
     def summarize_text(self, text: str) -> SummaryResponse:
         model = self.router.get_model(TaskType.SUMMARIZE)
